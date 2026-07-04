@@ -1664,6 +1664,7 @@ class QMAP_OT_AddSelectedMeshes(bpy.types.Operator):
                     item = world.qmap_meshes.add()
                     item.mesh = obj
                     # 使用全局设置作为默认值
+                    item.geo_type = world.qmap_option_geo
                     item.soup_dir = world.qmap_option_soup_dir
                     added += 1
 
@@ -1772,6 +1773,7 @@ class QMAP_OT_ExportWorldMap(bpy.types.Operator):
             "option_tm": world.qmap_option_tm,
             "option_mod": world.qmap_option_mod,
             "option_tj": world.qmap_option_tj,
+            "option_geo": world.qmap_option_geo,
             "option_grid": world.qmap_option_grid,
             "option_depth": world.qmap_option_depth,
             "option_scale": world.qmap_option_scale,
@@ -1785,6 +1787,7 @@ class QMAP_OT_ExportWorldMap(bpy.types.Operator):
             "option_skip": world.qmap_option_skip,
             "option_size": world.qmap_option_size,
             "option_soup_dir": world.qmap_option_soup_dir,
+            "option_miter_method": world.qmap_option_miter_method,
             "option_lights": "None",
             "option_empties": "None",
             "option_nurbs": "None",
@@ -1897,6 +1900,8 @@ class WORLD_PT_QMapExport(bpy.types.Panel):
         col.separator()
         col.label(text="地形(Soup)默认设置:")
         col.prop(world, "qmap_option_soup_dir")
+        col.label(text="外壳(Miter)默认设置:")
+        col.prop(world, "qmap_option_miter_method")
 
         # 导出按钮
         layout.separator()
@@ -1925,6 +1930,7 @@ class QMAP_OT_SavePreferences(bpy.types.Operator):
         prefs.tm = world.qmap_option_tm
         prefs.mod = world.qmap_option_mod
         prefs.tj = world.qmap_option_tj
+        prefs.geo = world.qmap_option_geo
         prefs.grid = world.qmap_option_grid
         prefs.depth = world.qmap_option_depth
         prefs.scale = world.qmap_option_scale
@@ -1938,6 +1944,7 @@ class QMAP_OT_SavePreferences(bpy.types.Operator):
         prefs.skip = world.qmap_option_skip
         prefs.size = world.qmap_option_size
         prefs.soup_dir = world.qmap_option_soup_dir
+        prefs.miter_method = world.qmap_option_miter_method
 
         self.report({"INFO"}, "已保存设置为默认值")
         return {"FINISHED"}
@@ -2059,6 +2066,12 @@ def register():
         items=ptxt["soup_dir"]["items"],
         description="新网格体的默认地形方向",
     )
+    bpy.types.World.qmap_option_miter_method = EnumProperty(
+        name=ptxt["miter_method"]["name"],
+        default=prefs.miter_method,
+        items=ptxt["miter_method"]["items"],
+        description=ptxt["miter_method"]["desc"],
+    )
 
 
 def unregister():
@@ -2095,3 +2108,4 @@ def unregister():
     del bpy.types.World.qmap_option_skip
     del bpy.types.World.qmap_option_size
     del bpy.types.World.qmap_option_soup_dir
+    del bpy.types.World.qmap_option_miter_method
