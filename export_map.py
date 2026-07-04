@@ -355,6 +355,116 @@ def _export_prefs():
     return _EXPORT_DEFAULTS
 
 
+def _set_export_operator_defaults():
+    prefs = _export_prefs()
+    ExportQuakeMap.__annotations__.update(
+        {
+            "option_sel": BoolProperty(
+                name=ptxt["sel"]["name"], default=prefs.sel, description=ptxt["sel"]["desc"]
+            ),
+            "option_tm": BoolProperty(
+                name=ptxt["tm"]["name"], default=prefs.tm, description=ptxt["tm"]["desc"]
+            ),
+            "option_mod": BoolProperty(
+                name=ptxt["mod"]["name"], default=prefs.mod, description=ptxt["mod"]["desc"]
+            ),
+            "option_tj": BoolProperty(
+                name=ptxt["tj"]["name"], default=prefs.tj, description=ptxt["tj"]["desc"]
+            ),
+            "option_geo": EnumProperty(
+                name=ptxt["geo"]["name"], default=prefs.geo, items=ptxt["geo"]["items"]
+            ),
+            "option_nurbs": EnumProperty(
+                name=ptxt["nurbs"]["name"],
+                default=prefs.nurbs,
+                items=ptxt["nurbs"]["items"],
+            ),
+            "option_lights": EnumProperty(
+                name=ptxt["lights"]["name"],
+                default=prefs.lights,
+                items=ptxt["lights"]["items"],
+            ),
+            "option_empties": EnumProperty(
+                name=ptxt["empties"]["name"],
+                default=prefs.empties,
+                items=ptxt["empties"]["items"],
+            ),
+            "option_grid": FloatProperty(
+                name=ptxt["grid"]["name"],
+                min=0,
+                default=prefs.grid,
+                description=ptxt["grid"]["desc"],
+            ),
+            "option_depth": FloatProperty(
+                name=ptxt["depth"]["name"],
+                default=prefs.depth,
+                description=ptxt["depth"]["desc"],
+            ),
+            "option_scale": FloatProperty(
+                name=ptxt["scale"]["name"],
+                default=prefs.scale,
+                description=ptxt["scale"]["desc"],
+            ),
+            "option_fp": IntProperty(
+                name=ptxt["fp"]["name"],
+                min=0,
+                soft_max=17,
+                default=prefs.fp,
+                description=ptxt["fp"]["desc"],
+            ),
+            "option_brush": EnumProperty(
+                name=ptxt["brush"]["name"],
+                default=prefs.brush,
+                items=ptxt["brush"]["items"],
+            ),
+            "option_uv": EnumProperty(
+                name=ptxt["uv"]["name"], default=prefs.uv, items=ptxt["uv"]["items"]
+            ),
+            "option_flags": EnumProperty(
+                name=ptxt["flags"]["name"],
+                default=prefs.flags,
+                items=ptxt["flags"]["items"],
+            ),
+            "option_dest": EnumProperty(
+                name=ptxt["dest"]["name"], default=prefs.dest, items=ptxt["dest"]["items"]
+            ),
+            "option_group": EnumProperty(
+                name=ptxt["group"]["name"],
+                default=prefs.group,
+                items=ptxt["group"]["items"],
+            ),
+            "option_gname": StringProperty(
+                name=ptxt["gname"]["name"],
+                default=prefs.gname,
+                description=ptxt["gname"]["desc"],
+            ),
+            "option_skip": StringProperty(
+                name=ptxt["skip"]["name"],
+                default=prefs.skip,
+                description=ptxt["skip"]["desc"],
+            ),
+            "option_size": EnumProperty(
+                name=ptxt["size"]["name"],
+                default=prefs.size,
+                items=ptxt["size"]["items"],
+                description=ptxt["size"]["desc"],
+            ),
+            "option_soup_dir": EnumProperty(
+                name=ptxt["soup_dir"]["name"],
+                default=prefs.soup_dir,
+                items=ptxt["soup_dir"]["items"],
+                description=ptxt["soup_dir"]["desc"],
+            ),
+            "option_miter_method": EnumProperty(
+                name=ptxt["miter_method"]["name"],
+                default=prefs.miter_method,
+                items=ptxt["miter_method"]["items"],
+                description=ptxt["miter_method"]["desc"],
+            ),
+        }
+    )
+
+
 class ExportQuakeMap(bpy.types.Operator, ExportHelper):
     bl_idname = "export.map"
     bl_label = bl_info["name"]
@@ -461,6 +571,14 @@ class ExportQuakeMap(bpy.types.Operator, ExportHelper):
     spot_name, spot_class, spot_offset = "spot_target_", "info_null", 64
     # export cameras as point entities, match entity's +X to camera's -Z
     cam_correct = Euler((-math.pi / 2, 0, math.pi / 2), "ZXY").to_matrix().to_4x4()
+
+    def invoke(self, context, event):
+        prefs = _export_prefs()
+        for name in ptxt:
+            attr = f"option_{name}"
+            if hasattr(self, attr):
+                setattr(self, attr, getattr(prefs, name))
+        return super().invoke(context, event)
 
     def draw(self, context):
         o = "option_"
@@ -1952,6 +2070,7 @@ class QMAP_OT_SavePreferences(bpy.types.Operator):
 
 # 在register函数中注册新的类和属性
 def register():
+    _set_export_operator_defaults()
     bpy.utils.register_class(ExportQuakeMap)
     bpy.types.Object.qmap_geo_type = bpy.props.EnumProperty(
         name="Geo",
